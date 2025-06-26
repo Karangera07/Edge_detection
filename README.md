@@ -30,9 +30,13 @@ Edge detection is a foundational task in image processing and computer vision. H
 
 ---
 
-## How to Use 
-1. Clone the repository and add your image adress(in the image = cv2.imread("cat.jpg", cv2.IMREAD_GRAYSCALE) line) that is to be sent for edge detection/smoothening .
-2. Run the file .
-3. One can see the example image within the folder for reference .
+##  How to Use 
+1. Clone the repository .
+2. edge_detection.py and anisotropic_diffusion.py first smoothen the image and then detects the edges and gives contour plot.
+3. Add your image adress(in the image = cv2.imread("your_image", cv2.IMREAD_GRAYSCALE) line) that is to be sent for edge detection/smoothening .
+4. One can change the number of iterations in case of smoothening more iterations means more blurring hence only prominent edges appear after edge_detection .
+5. Another way is to tune value of "k" in anisotropic diffusion , lower the k , higher is the sensitivity to edges .
+6. Run the file .
+7. One can see the example image within the folder for reference .
 
 
