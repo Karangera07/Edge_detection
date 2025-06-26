@@ -2,31 +2,31 @@ import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 
-# Load grayscale image
-img = cv2.imread('flower.webp', cv2.IMREAD_GRAYSCALE)
-img = img.astype(np.float32) / 255.0
+# Load image in grayscale
+image = cv2.imread("your_image", cv2.IMREAD_GRAYSCALE)
+image = image.astype(np.float32) / 255.0  # Normalize to [0, 1]
 
-# Apply anisotropic diffusion
-def anisotropic_diffusion(img, n_iter=20, k=50, lamb=0.25):
-    for _ in range(n_iter):
-        north = np.roll(img, -1, axis=0) - img
-        south = np.roll(img, 1, axis=0) - img
-        east = np.roll(img, -1, axis=1) - img
-        west = np.roll(img, 1, axis=1) - img
+# Heat equation parameters
+alpha = 1       # Diffusion coefficient
+dt = 0.1          # Time step
+num_iter = 20     # Number of diffusion steps
 
-        c_n = np.exp(-(north / k) ** 2)
-        c_s = np.exp(-(south / k) ** 2)
-        c_e = np.exp(-(east / k) ** 2)
-        c_w = np.exp(-(west / k) ** 2)
+# Copy image for processing
+u = image.copy()
 
-        img += lamb * (c_n * north + c_s * south + c_e * east + c_w * west)
+# Diffusion loop
+for _ in range(num_iter):
+    # Laplacian approximation
+    laplacian = (
+        np.roll(u, 1, axis=0) + np.roll(u, -1, axis=0) +
+        np.roll(u, 1, axis=1) + np.roll(u, -1, axis=1) -
+        4 * u
+    )
+    u += alpha * dt * laplacian
 
-    return img
 
-# Apply diffusion and Sobel edge detection
-diffused = anisotropic_diffusion(img, n_iter=20, k=20, lamb=0.25)
-sobel_x = cv2.Sobel(diffused, cv2.CV_64F, 1, 0, ksize=3)
-sobel_y = cv2.Sobel(diffused, cv2.CV_64F, 0, 1, ksize=3)
+sobel_x = cv2.Sobel(u, cv2.CV_64F, 1, 0, ksize=3)
+sobel_y = cv2.Sobel(u, cv2.CV_64F, 0, 1, ksize=3)
 edges = np.hypot(sobel_x, sobel_y)
 
 # Normalize and convert to 8-bit
@@ -42,12 +42,10 @@ contours, _ = cv2.findContours(binary_edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX
 contour_img = np.zeros_like(edges_norm)
 cv2.drawContours(contour_img, contours, -1, 255, 1)
 
-# Plotting
-plt.figure(figsize=(12, 4))
-
+plt.figure(figsize=(12,4))
 plt.subplot(1, 3, 1)
 plt.title("Original Image")
-plt.imshow(img, cmap='gray')
+plt.imshow(u, cmap='gray')
 plt.axis('off')
 
 plt.subplot(1, 3, 2)
@@ -61,5 +59,5 @@ plt.imshow(contour_img, cmap='gray')
 plt.axis('off')
 
 plt.tight_layout()
-plt.savefig("edge_detection_using_anisotropic")
+plt.savefig("edge_detection_using_heat_equation")
 plt.show()
